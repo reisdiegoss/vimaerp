@@ -1,0 +1,103 @@
+# ══════════════════════════════════════════════════════════
+# VimaERP 2.0 — Docker Stack (Swarm + Traefik)
+# Deploy: docker stack deploy -c docker-stack.yml vimaerp
+# ══════════════════════════════════════════════════════════
+
+version: "3.8"
+
+services:
+  # ─────────────────────────────────────────────
+  # Backend API (FastAPI + Gunicorn)
+  # ─────────────────────────────────────────────
+  api:
+    image: vimasistemas/vimaerp:backend
+    hostname: vimaerp_api
+    environment:
+      # PostgreSQL
+      - DATABASE_URL=postgresql+asyncpg://postgres:6ffdd4a3d0e99d78b1e15f411b04e323@postgres:5432/vimaerp
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
+      # JWT (TROCAR EM PRODUÇÃO!)
+      - JWT_SECRET_KEY=235ad46e59e22e60628a9ab25534d82c9e44b16b6f64f8bb52057885ebf6aa0a
+      - JWT_ALGORITHM=HS256
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=480
+      # App
+      - APP_NAME=VimaERP
+      - APP_VERSION=2.0.0
+      - DEBUG=true
+
+    networks:
+      - network_public
+
+    deploy:
+      mode: replicated
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+      update_config:
+        parallelism: 1
+        delay: 15s
+        order: start-first
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  # ─────────────────────────────────────────────
+  # Celery Worker (Background Tasks)
+  # ─────────────────────────────────────────────
+  worker:
+    image: vimasistemas/vimaerp:backend
+    hostname: vimaerp_worker
+    command: >
+      python -m celery -A celery_app worker
+      --loglevel=info
+      --concurrency=2
+      --max-tasks-per-child=100
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:6ffdd4a3d0e99d78b1e15f411b04e323@postgres:5432/vimaerp
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=235ad46e59e22e60628a9ab25534d82c9e44b16b6f64f8bb52057885ebf6aa0a
+      - DEBUG=true
+
+    # Desabilitar healthcheck herdado do Dockerfile (worker não roda HTTP)
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import celery; print(\"ok\")'"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    networks:
+      - network_public
+
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 5
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+      labels:
+        - "traefik.enable=false"
+
+networks:
+  network_public:
+    external: true

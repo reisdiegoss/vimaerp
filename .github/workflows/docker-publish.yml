@@ -1,0 +1,30 @@
+name: Deploy Docker Image
+
+# Quando esse arquivo será executado
+on:
+  push:
+    branches: [ "main" ] # Executa apenas ao subir commit na branch main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build e Push da Imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # Substitua 'seu-usuario' e 'seu-repositorio' pelos seus dados reais
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/vimaerp:latest

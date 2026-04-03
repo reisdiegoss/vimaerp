@@ -1,0 +1,1 @@
+# VimaERP Celery Tasks

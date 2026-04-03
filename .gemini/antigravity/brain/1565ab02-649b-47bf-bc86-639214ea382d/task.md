@@ -1,0 +1,17 @@
+- [x] Atualizar Schemas do Backend (`backend/app/schemas/produto.py`)
+    - [x] Adicionar campos de Marketing e Suprimentos
+    - [x] Adicionar campos de Logística e Fiscal ausentes
+- [x] Implementar Camada de Serviços no Frontend
+    - [x] Atualizar tipagem em `produtos.ts`
+    - [x] Implementar hook `useInsumos` em `produtos.ts`
+    - [x] Criar `pessoas.ts` com hook `useFornecedores`
+- [x] Finalizar Interface em `ProdutoFormSheet.tsx`
+    - [x] Integrar `useInsumos` na aba Produção (Ficha Técnica)
+    - [x] Implementar lógica de unidade de medida automática (read-only)
+    - [x] Implementar aba Marketing (Link vídeo, Descrição detalhada)
+    - [x] Implementar aba Fornecedor (Suprimentos)
+    - [x] Implementar aba Outros (Garantia)
+    - [x] Revisar mapeamento de campos no `onSubmit` e `reset`
+- [x] Verificação e Testes
+    - [x] Validar salvamento de novos campos
+    - [x] Verificar integridade da Ficha Técnica

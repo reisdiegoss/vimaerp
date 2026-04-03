@@ -1,0 +1,11 @@
+     # Postgres
+      - DB_CONNECTION=pgsql
+      - DB_HOST=master.vimasistemas.com.br
+      - DB_PORT=5432
+      - DB_DATABASE=vimaerp
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=6ffdd4a3d0e99d78b1e15f411b04e323
+      # Redis
+      - REDIS_HOST=master.vimasistemas.com.br
+      - REDIS_PASSWORD=null
+      - REDIS_PORT=6379
